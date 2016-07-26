@@ -1,47 +1,42 @@
-// server.js
+/*
+APP NAME: Grocery Tracker
+CREATED BY: Blake Hefley
+CREATED DATE: July 23rd, 2016
+UPDATED DATE: July 26th, 2016
+LAST UPDATED BY: Blake Hefley
+CONTRIBUTING DEVELOPERS: Blake Hefley
+*/
 
-// BASE SETUP
-// =============================================================================
+//call express
+var express    = require('express');
 
-// call the packages we need
-var express    = require('express');        // call express
-var app        = express();                 // define our app using express
+//define the app using express
+var app        = express();
+
+// configure app to use bodyParser() for getting POST data
 var bodyParser = require('body-parser');
-
-// configure app to use bodyParser()
-// this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var port = process.env.PORT || 8080;        // set our port
+//Set port
+var port = process.env.PORT || 8080;
 
+//Connect to Mongo database
 var mongoose   = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/GroceryTracker'); // connect to our database
-var Ingredient = require('./app/models/Ingredient');
-// ROUTES FOR OUR API
-// =============================================================================
-var router = express.Router();              // get an instance of the express Router
+mongoose.connect('mongodb://localhost:27017/GroceryTracker');
 
-// test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
-});
+//Get an instance of the express Router
+var router = express.Router();
 
-// more routes for our API will happen here
-router.route('/ingredients')
-	.get(function(req, res) {
-		Ingredient.find(function(err, ingredients) {
-			if (err)
-				res.send(err);
+//Include 'users' Route
+require('./users-api-route')(router);
+require('./ingredient-api-route')(router);
 
-			res.json(ingredients);
-		});
-	});
-// REGISTER OUR ROUTES -------------------------------
-// all of our routes will be prefixed with /api
+// all routes will be prefixed with /api
 app.use('/api', router);
 
-// START THE SERVER
-// =============================================================================
+//Start the server
 app.listen(port);
+
+//log output port
 console.log('Magic happens on port ' + port);

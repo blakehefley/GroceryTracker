@@ -2,7 +2,7 @@ var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
 var IngredientSchema   = new Schema({
-	id: Number,
+	user: String,
     name: String
 }, {collection: 'Ingredients'});
 
