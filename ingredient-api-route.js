@@ -50,6 +50,7 @@ module.exports = function(router){
 				}
 	    	});
 		})
+		//API to delete Ingredient
 		.delete(function(req, res) {
 			//Find User based on token and username
 			User.find({ currToken: req.headers.currtoken, username: req.headers.username  }, function(err, users){
@@ -60,14 +61,41 @@ module.exports = function(router){
 						user: users[0].username,
 			            _id: req.body.ingredient_id
 			        }, function(err, ingredient) {
-			            if (err)
+			            if (err){
 			                res.send(err);
-
+			            }
 			            res.json(errorHandler.deleteSuccessfulMessage);
 			        });
 				}
 	    	});
 	    })
+		//API to update Ingredient
+	    .put(function(req, res) {
+			//Find User based on token and username
+			User.find({ currToken: req.headers.currtoken, username: req.headers.username  }, function(err, users){
+				//Check for user errors
+		    	if (errorHandler.userErrorCheck(res, err, users)){
+		    		//Find ingredient
+        			Ingredient.findById(req.body.ingredient_id, function(err, ingredient) {
+        				if (err){
+			                res.send(err);
+			            }
+			            else if(ingredient.user !== req.headers.username){
+			            	res.send('Incorrect username or Ingredient Identifier.');
+			            }else{
+	        				var oldName = ingredient.name;
+	        				ingredient.name = req.body.name;
+	        				ingredient.save(function(err) {
+				                if (err)
+				                    res.send(err);
+
+				                res.json({ message: oldName + ' updated to ' + ingredient.name + '!' });
+				            });
+	        			}
+			        });
+        		}
+        	});
+		})
 	;
 	//Admin API for checking all ingredients regardless of user
 	//TODO: Remove this functionality prior to release

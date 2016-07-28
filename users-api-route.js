@@ -11,7 +11,7 @@ var errorHandler = require('./errorHandler');
 
 module.exports = function(router){
 	//API for Users
-	router.route('/users')
+	router.route('/user')
 		//Add user
 		.post(function(req, res) {
 			//Check that Username and Password are included
@@ -110,5 +110,51 @@ module.exports = function(router){
 				}
 			});
 	    })
+	;
+	router.route('/user/refreshToken')
+		.put(function(req, res) {
+			//Find User based on token and username
+			User.find({ username: req.headers.username }, function(err, users){
+				//Check for user errors
+		    	if (errorHandler.userErrorCheck(res, err, users)){
+		    		if(bcrypt.compareSync(req.headers.passhash, users[0].passHash)){
+		    			users[0].currToken = uuid.v1();
+		    			users[0].save(function(err) {
+				            if (err){
+				                res.send(err);
+				            }
+				            //Return user's token
+				            res.json({ token: users[0].currToken });
+				        });
+		    		}else{
+		    			res.json({message: 'Incorrect password.'});
+		    		}
+        		}
+        	});
+		})
+	;
+	router.route('/user/password')
+		.put(function(req, res) {
+			//Find User based on token and username
+			User.find({ username: req.headers.username }, function(err, users){
+				//Check for user errors
+		    	if (errorHandler.userErrorCheck(res, err, users)){
+		    		if(bcrypt.compareSync(req.headers.passhash, users[0].passHash)){
+		    			var hash = bcrypt.hashSync(req.body.passHash, salt);
+				        users[0].passHash = hash;
+				        users[0].currToken = uuid.v1()
+		    			users[0].save(function(err) {
+				            if (err){
+				                res.send(err);
+				            }
+				            //Return user's token
+				            res.json({ token: users[0].currToken });
+				        });
+		    		}else{
+		    			res.json({message: 'Incorrect password.'});
+		    		}
+        		}
+        	});
+		})
 	;
 }
