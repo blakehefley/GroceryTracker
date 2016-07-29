@@ -111,7 +111,7 @@ module.exports = function(router){
 			});
 	    })
 	;
-	router.route('/user/refreshToken')
+	router.route('/user/login')
 		.put(function(req, res) {
 			//Find User based on token and username
 			User.find({ username: req.headers.username }, function(err, users){
